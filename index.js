@@ -3,7 +3,7 @@
 
 const express = require('express');
 const app = express();
-
+app.use(express.json());   // lets the server read JSON sent by the app
 // Render will tell our app which port to use via process.env.PORT
 // If that's not set (e.g. testing on your own computer), fall back to 3000
 const PORT = process.env.PORT || 3000;
@@ -50,6 +50,43 @@ app.get('/', (req, res) => {
 // Also make it available at "/users" as a more descriptive endpoint
 app.get('/users', (req, res) => {
   res.json(users);
+});
+
+// SIGN UP: add a new user
+app.post('/register', (req, res) => {
+  const { FirstName, LastName, Email, Password } = req.body;
+
+  if (!FirstName || !Email || !Password) {
+    return res.status(400).json({ message: "Name, email and password are required" });
+  }
+
+  const exists = users.find(u => u.Email.toLowerCase() === Email.toLowerCase());
+  if (exists) {
+    return res.status(409).json({ message: "Email is already registered" });
+  }
+
+  users.push({ LastName: LastName || "", FirstName, Email, Password });
+  res.status(201).json({ message: "Registration successful" });
+});
+
+// LOGIN: check if the user exists and the password is right
+app.post('/login', (req, res) => {
+  const { Email, Password } = req.body;
+  const user = users.find(u => u.Email.toLowerCase() === (Email || "").toLowerCase());
+
+  if (!user) {
+    return res.status(404).json({ message: "User does not exist. Please sign up." });
+  }
+  if (user.Password !== Password) {
+    return res.status(401).json({ message: "Incorrect password" });
+  }
+
+  res.json({
+    message: "Login successful",
+    FirstName: user.FirstName,
+    LastName: user.LastName,
+    Email: user.Email
+  });
 });
 
 // Start the server
