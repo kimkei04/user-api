@@ -2,6 +2,8 @@
 // This uses Express, a popular library for building web servers in Node.js
 
 const express = require('express');
+const customersRoute = require('./customers');
+
 const app = express();
 app.use(express.json());   // lets the server read JSON sent by the app
 // Render will tell our app which port to use via process.env.PORT
@@ -88,6 +90,8 @@ app.post('/login', (req, res) => {
     Email: user.Email
   });
 });
+
+app.use('/customers', customersRoute);
 
 // Start the server
 app.listen(PORT, () => {
